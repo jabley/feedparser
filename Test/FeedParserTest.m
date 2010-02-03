@@ -31,7 +31,8 @@
 
 - (FPFeed *)feedFromFixture:(NSString *)fixture {
 	NSData *data = [NSData dataWithContentsOfFile:[[NSBundle bundleForClass:[FeedParserTest class]] pathForResource:fixture ofType:nil]];
-	NSError *error = nil;
+	STAssertNotNil(data, @"Unable to load fixture: %@", fixture);
+    NSError *error = nil;
 	FPFeed *feed = [FPParser parsedFeedWithData:data error:&error];
 	STAssertNotNil(feed, @"FPParser returned error: %@", [error localizedDescription]);
 	return feed;
@@ -119,7 +120,7 @@ us fly through the Solar System more quickly.  The proposed VASIMR engine would 
 						 @"How do Americans get ready to work with Russians aboard the International Space Station? " \
 						 @"They take a crash course in culture, language and protocol at Russia's " \
 						 @"<a href=\"http://howe.iki.rssi.ru/GCTC/gctc_e.htm\">Star City</a>.", nil);
-	
+
 }
 
 - (void)testSupportedExtensions {
@@ -181,4 +182,74 @@ us fly through the Solar System more quickly.  The proposed VASIMR engine would 
 	STAssertEquals([item.enclosures count], 1u, nil);
 	STAssertEqualObjects([item.enclosures objectAtIndex:0], [FPEnclosure enclosureWithURL:@"http://www.scripting.com/mp3s/weatherReportDicksPicsVol7.mp3" length:6182912 type:@"audio/mpeg"], nil);
 }
+
+- (void)testStandaloneAtomFeed {
+    FPFeed *feed = [self feedFromFixture:@"index.atom"];
+
+    STAssertEqualObjects([feed atomId], @"http://intertwingly.net/blog/index.atom", nil);
+    STAssertEqualObjects([feed title], @"Sam Ruby", nil);
+    STAssertEqualObjects([feed subTitle], @"It’s just data", nil); // please note - not a simple single quote char
+
+    STAssertEquals([[feed links] count], 3u, nil);
+
+    FPLink *link = [[feed links] objectAtIndex:0];
+
+    STAssertEqualObjects([link rel], @"self", @"first link is the rel=self link", nil);
+    STAssertEqualObjects([link href], @"http://intertwingly.net/blog/index.atom", @"first link points at the feed itself", nil);
+
+    link = [[feed links] objectAtIndex:1];
+    STAssertEqualObjects([link rel], @"alternate", @"second link has no explicit rel attribute, so defaults to 'alternate'", nil);
+    STAssertEqualObjects([link href], @"/blog/", @"second link points at the /blog/ resource", nil);
+
+    link = [[feed links] objectAtIndex:2];
+    STAssertEqualObjects([link rel], @"license", @"third link is the rel=license link", nil);
+    STAssertEqualObjects([link href], @"http://creativecommons.org/licenses/BSD/", @"third link points at the http://creativecommons.org/licenses/BSD/ resource", nil);
+
+
+    // FIXME: Find a less verbose way of doing this, blimey!
+    NSDateComponents *components = [[NSDateComponents alloc ] init];
+    [components setYear:2010];
+    [components setMonth:2];
+    [components setDay:2];
+    [components setHour:21];
+    [components setMinute:41];
+    [components setSecond:49];
+    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+    [calendar setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:(-5 * 3600)]];
+    STAssertEqualObjects([feed updated], [calendar dateFromComponents:components], @"feed updated date is correct", nil);
+    [components release];
+    [calendar release];
+
+    STAssertEquals([[feed items] count], 20u, nil);
+
+    FPItem *entry = [[feed items] objectAtIndex:0];
+
+    STAssertEqualObjects([entry atomId], @"tag:intertwingly.net,2004:3109", @"Entry <id/> is handled", nil);
+    STAssertEqualObjects([entry title], @"Rails 3.0 on Cygwin", @"Entry <title/> is handled", nil);
+
+    STAssertEquals([[entry links] count], 2u, @"There are 2 links in the first entry", nil);
+    link = [[entry links] objectAtIndex:0];
+    STAssertEqualObjects([link rel], @"alternate", @"first link rel defaults to alternate", nil);
+    STAssertEqualObjects([link href], @"/blog/2010/02/01/Rails-3-0-on-Cygwin", @"First link points at the blog entry", nil);
+
+    link = [[entry links] objectAtIndex:1];
+    STAssertEqualObjects([link rel], @"replies", @"second link rel is the comments Atom feed", nil);
+    STAssertEqualObjects([link href], @"3109.atom", @"second link points at the comments feed resource", nil);
+
+    components = [[NSDateComponents alloc ] init];
+    [components setYear:2010];
+    [components setMonth:2];
+    [components setDay:1];
+    [components setHour:21];
+    [components setMinute:10];
+    [components setSecond:26];
+    calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+    [calendar setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:(-5 * 3600)]];
+    // 2010-02-01T21:10:26-05:00
+    STAssertEqualObjects([entry updated], [calendar dateFromComponents:components], @"entry updated date is correct", nil);
+
+
+}
+
+
 @end

@@ -28,8 +28,13 @@
 #import "FPLink.h"
 #import "FPParser.h"
 #import "NSDate_FeedParserExtensions.h"
+#import "ISO8601DateFormatter.h"
 
 @interface FPFeed ()
+@property (nonatomic, copy, readwrite) NSString *atomId;
+@property (nonatomic, copy, readwrite) NSString *icon;
+@property (nonatomic, copy, readwrite) NSString *subTitle;
+@property (nonatomic, copy, readwrite) NSDate *updated;
 @property (nonatomic, copy, readwrite) NSString *title;
 @property (nonatomic, copy, readwrite) NSString *feedDescription;
 @property (nonatomic, copy, readwrite) NSDate *pubDate;
@@ -37,10 +42,16 @@
 - (void)rss_item:(NSDictionary *)attributes parser:(NSXMLParser *)parser;
 - (void)rss_link:(NSString *)textValue attributes:(NSDictionary *)attributes parser:(NSXMLParser *)parser;
 - (void)atom_link:(NSDictionary *)attributes parser:(NSXMLParser *)parser;
+- (void)atom_updated:(NSString*)textValue attributes:(NSDictionary*)attributes parser:(NSXMLParser*)parser;
+- (void)atom_entry:(NSDictionary*)attributes parser:(NSXMLParser *)parser;
 @end
 
 @implementation FPFeed
 @synthesize title, link, links, feedDescription, pubDate, items;
+@synthesize atomId;
+@synthesize icon;
+@synthesize subTitle;
+@synthesize updated;
 
 + (void)initialize {
 	if (self == [FPFeed class]) {
@@ -54,9 +65,20 @@
 			[self registerRSSHandler:NULL forElement:key type:FPXMLParserSkipElementType];
 		}
 		[self registerRSSHandler:@selector(rss_item:parser:) forElement:@"item" type:FPXMLParserStreamElementType];
-		
+
 		// atom elements
 		[self registerAtomHandler:@selector(atom_link:parser:) forElement:@"link" type:FPXMLParserSkipElementType];
+        [self registerAtomHandler:@selector(setAtomId:) forElement:@"id" type:FPXMLParserTextElementType];
+        [self registerAtomHandler:@selector(setIcon:) forElement:@"icon" type:FPXMLParserTextElementType];
+        [self registerAtomHandler:@selector(setTitle:) forElement:@"title" type:FPXMLParserTextElementType];
+        [self registerAtomHandler:@selector(setSubTitle:) forElement:@"subtitle" type:FPXMLParserTextElementType];
+        [self registerAtomHandler:@selector(atom_updated:attributes:parser:) forElement:@"updated" type:FPXMLParserTextElementType];
+        [self registerAtomHandler:@selector(atom_entry:parser:) forElement:@"entry" type:FPXMLParserStreamElementType];
+
+        for  (NSString *key in [NSArray arrayWithObjects:
+                                @"author", nil]) {
+            [self registerAtomHandler:NULL forElement:key type:FPXMLParserSkipElementType];
+        }
 	}
 }
 
@@ -102,10 +124,25 @@
 	[aLink release];
 }
 
+- (void)atom_updated:(NSString *)textValue attributes:(NSDictionary *)attributes parser:(NSXMLParser *)parser {
+    self.updated = [[[[ISO8601DateFormatter alloc] init] autorelease] dateFromString:textValue];
+}
+
+- (void)atom_entry:(NSDictionary *)attributes parser:(NSXMLParser *)parser {
+	FPItem *item = [[FPItem alloc] initWithBaseNamespaceURI:baseNamespaceURI];
+	[item acceptParsing:parser];
+	[items addObject:item];
+	[item release];
+}
+
 - (void)dealloc {
+    [atomId release];
 	[title release];
+    [subTitle release];
 	[link release];
 	[links release];
+    [icon release];
+    [updated release];
 	[feedDescription release];
 	[pubDate release];
 	[items release];

@@ -26,7 +26,10 @@
 #import "FPItem.h"
 #import "FPLink.h"
 #import "FPEnclosure.h"
+#import "FPAtomText.h"
+
 #import "NSDate_FeedParserExtensions.h"
+#import "ISO8601DateFormatter.h"
 
 @interface FPItem ()
 @property (nonatomic, copy, readwrite) NSString *title;
@@ -36,15 +39,40 @@
 @property (nonatomic, copy, readwrite) NSString *creator;
 @property (nonatomic, copy, readwrite) NSDate *pubDate;
 @property (nonatomic, copy, readwrite) NSString *author;
+@property (nonatomic, copy, readwrite) NSString *atomId;
+@property (nonatomic, copy, readwrite) NSDate *updated;
 - (void)rss_pubDate:(NSString *)textValue attributes:(NSDictionary *)attributes parser:(NSXMLParser *)parser;
 - (void)rss_link:(NSString *)textValue attributes:(NSDictionary *)attributes parser:(NSXMLParser *)parser;
 - (void)atom_link:(NSDictionary *)attributes parser:(NSXMLParser *)parser;
 - (void)rss_enclosure:(NSDictionary *)attributes parser:(NSXMLParser *)parser;
+- (void)atom_title:(NSDictionary*)attributes parser:(NSXMLParser*)parser;
+- (void)atom_updated:(NSString*)textValue attributes:(NSDictionary*)attributes parser:(NSXMLParser*)parser;
+- (void)atom_content:(NSDictionary*)attributes parser:(NSXMLParser*)parser;
+- (void)atom_summary:(NSDictionary*)attributes parser:(NSXMLParser*)parser;
 @end
 
+// atomEntry =
+//  element atom:entry {
+//    atomCommonAttributes,
+//    (atomAuthor*
+//     & atomCategory*
+//     & atomContent?
+//     & atomContributor*
+//     & atomId
+//     & atomLink*
+//     & atomPublished?
+//     & atomRights?
+//     & atomSource?
+//     & atomSummary?
+//     & atomTitle
+//     & atomUpdated
+//     & extensionElement*)
+// }
 @implementation FPItem
 @synthesize title, link, links, guid, description, content, pubDate, author, enclosures;
 @synthesize creator;
+@synthesize atomId;
+@synthesize updated;
 
 + (void)initialize {
 	if (self == [FPItem class]) {
@@ -59,7 +87,12 @@
 			[self registerRSSHandler:NULL forElement:key type:FPXMLParserSkipElementType];
 		}
 		// Atom
+        [self registerAtomHandler:@selector(setAtomId:) forElement:@"id" type:FPXMLParserTextElementType];
 		[self registerAtomHandler:@selector(atom_link:parser:) forElement:@"link" type:FPXMLParserSkipElementType];
+        [self registerAtomHandler:@selector(atom_title:parser:) forElement:@"title" type:FPXMLParserStreamElementType];
+        [self registerAtomHandler:@selector(atom_updated:attributes:parser:) forElement:@"updated" type:FPXMLParserTextElementType];
+        [self registerAtomHandler:@selector(atom_content:parser:) forElement:@"content" type:FPXMLParserStreamElementType];
+        [self registerAtomHandler:@selector(atom_summary:parser:) forElement:@"summary" type:FPXMLParserStreamElementType];
 		// DublinCore
 		[self registerTextHandler:@selector(setCreator:) forElement:@"creator" namespaceURI:kFPXMLParserDublinCoreNamespaceURI];
 		// Content
@@ -90,6 +123,14 @@
 	[aLink release];
 }
 
+- (void)atom_title:(NSDictionary *)attributes parser:(NSXMLParser *)parser {
+    FPAtomText *text = [[FPAtomText alloc] initWithBaseNamespaceURI:baseNamespaceURI attributes:attributes];
+    [text acceptParsing:parser];
+//    [self setTitle:[text text]];
+    [text release];
+}
+
+
 - (void)atom_link:(NSDictionary *)attributes parser:(NSXMLParser *)parser {
 	NSString *href = [attributes objectForKey:@"href"];
 	if (href == nil) return; // sanity check
@@ -100,6 +141,48 @@
 	}
 	[links addObject:aLink];
 	[aLink release];
+}
+
+- (void)atom_updated:(NSString *)textValue attributes:(NSDictionary *)attributes parser:(NSXMLParser *)parser {
+    self.updated = [[[[ISO8601DateFormatter alloc] init] autorelease] dateFromString:textValue];
+}
+
+- (void)atom_content:(NSDictionary *)attributes parser:(NSXMLParser *)parser {
+    NSString *src = [attributes objectForKey:@"src"];
+
+    // If src is present, then do blah.
+    NSString *type = [attributes objectForKey:@"type"];
+
+    if (!type) {
+        type = @"text";
+    }
+
+    if ([@"text" isEqualToString:type]) {
+
+    } else if ([@"html" isEqualToString:type]) {
+
+    } else if ([@"xhtml" isEqualToString:type]) {
+
+    } else {
+        NSLog(@"Don't handle %@ type currently", type);
+    }
+}
+
+- (void)atom_summary:(NSDictionary *)attributes parser:(NSXMLParser *)parser {
+    // <summary/> is an Atom Text construct, like <title/>
+    NSString* type = [attributes valueForKey:@"type"];
+
+    if (!type) {
+        type = @"text";
+    }
+
+    if ([@"text" isEqualToString:type]) {
+        // Create a summary element using just the characters.
+    } else if ([@"html" isEqualToString:type]) {
+        NSLog(@"summary is html - not currently handled");
+    } else { // xhtml
+        NSLog(@"summary is xhtml - not currently handled");
+    }
 }
 
 - (void)rss_enclosure:(NSDictionary *)attributes parser:(NSXMLParser *)parser {

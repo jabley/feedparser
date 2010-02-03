@@ -31,13 +31,27 @@
 
 @interface FPFeed : FPXMLParser {
 @private
+    NSString *atomId;
 	NSString *title;
+    NSString *subTitle;
+    NSDate *updated;
 	FPLink *link;
 	NSMutableArray *links;
 	NSString *feedDescription;
 	NSDate *pubDate;
 	NSMutableArray *items;
+    NSString *icon;
 }
+
+// the id of an Atom feed - will be nil if the feed isn't a valid Atom feed.
+@property (nonatomic, copy, readonly) NSString *atomId;
+// The icon of an Atom feed, or nil if there isn't one.
+@property (nonatomic, copy, readonly) NSString *icon;
+// The updated element of an Atom feed.
+@property (nonatomic, copy, readonly) NSDate *updated;
+// The subtitle of an Atom feed
+@property (nonatomic, copy, readonly) NSString *subTitle;
+
 @property (nonatomic, copy, readonly) NSString *title;
 // RSS <link> or Atom <link rel="alternate">
 // If multiple qualifying links exist, the first is returned

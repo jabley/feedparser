@@ -39,6 +39,9 @@
 		0AACF2750F8AC1350061AEB8 /* FPFeed.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A339C990F8804E400D0F64E /* FPFeed.m */; };
 		0AACF27F0F8AC1540061AEB8 /* FeedParserTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 0AACF27E0F8AC1540061AEB8 /* FeedParserTest.m */; };
 		0AAF74D40F8AEE3800120935 /* RFC822Test.m in Sources */ = {isa = PBXBuildFile; fileRef = 0AAF74D30F8AEE3800120935 /* RFC822Test.m */; };
+		F8A526851119A6EE00ABD62E /* index.atom in Resources */ = {isa = PBXBuildFile; fileRef = F8A526841119A6EE00ABD62E /* index.atom */; };
+		F8A527561119CA9900ABD62E /* ISO8601DateFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F8A527541119CA9900ABD62E /* ISO8601DateFormatter.m */; };
+		F8A528D8111AFDD500ABD62E /* FPAtomText.m in Sources */ = {isa = PBXBuildFile; fileRef = F8A528D7111AFDD500ABD62E /* FPAtomText.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -86,6 +89,11 @@
 		0AAF74D20F8AEE3800120935 /* RFC822Test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RFC822Test.h; sourceTree = "<group>"; };
 		0AAF74D30F8AEE3800120935 /* RFC822Test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RFC822Test.m; sourceTree = "<group>"; };
 		0AD2F7350F9044C800D7CAF1 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		F8A526841119A6EE00ABD62E /* index.atom */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = index.atom; sourceTree = "<group>"; };
+		F8A527541119CA9900ABD62E /* ISO8601DateFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ISO8601DateFormatter.m; sourceTree = "<group>"; };
+		F8A527551119CA9900ABD62E /* ISO8601DateFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ISO8601DateFormatter.h; sourceTree = "<group>"; };
+		F8A528D6111AFDD500ABD62E /* FPAtomText.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPAtomText.h; sourceTree = "<group>"; };
+		F8A528D7111AFDD500ABD62E /* FPAtomText.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPAtomText.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +133,8 @@
 				0A5C39CA0F8E98A000106D24 /* XML Extensions */,
 				0A9BB99B0F8ACCDE00CB5F5D /* Internal */,
 				0A9BB9F20F8AE17F00CB5F5D /* Extensions */,
+				F8A528D6111AFDD500ABD62E /* FPAtomText.h */,
+				F8A528D7111AFDD500ABD62E /* FPAtomText.m */,
 			);
 			path = FeedParser;
 			sourceTree = "<group>";
@@ -167,6 +177,8 @@
 		0A9BB9F20F8AE17F00CB5F5D /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				F8A527541119CA9900ABD62E /* ISO8601DateFormatter.m */,
+				F8A527551119CA9900ABD62E /* ISO8601DateFormatter.h */,
 				0A9BB9F30F8AE19000CB5F5D /* NSDate_FeedParserExtensions.h */,
 				0A9BB9F40F8AE19000CB5F5D /* NSDate_FeedParserExtensions.m */,
 				0A5C3CB70F9031E000106D24 /* NSString_extensions.h */,
@@ -191,6 +203,7 @@
 		0AACF26C0F8AC0810061AEB8 /* Fixtures */ = {
 			isa = PBXGroup;
 			children = (
+				F8A526841119A6EE00ABD62E /* index.atom */,
 				0AACF26D0F8AC0810061AEB8 /* sample-rss-091.rss */,
 				0AACF26E0F8AC0810061AEB8 /* sample-rss-092.rss */,
 				0AACF26F0F8AC0810061AEB8 /* sample-rss-2.rss */,
@@ -287,6 +300,7 @@
 				0AACF2720F8AC0810061AEB8 /* sample-rss-2.rss in Resources */,
 				0A5C3ACA0F8EAE3800106D24 /* extensions.rss in Resources */,
 				0A5C3BF40F901AF100106D24 /* rss-with-atom.rss in Resources */,
+				F8A526851119A6EE00ABD62E /* index.atom in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -346,6 +360,8 @@
 				0A5C3C7F0F902A2A00106D24 /* FPLink.m in Sources */,
 				0A5C3CBA0F9031E000106D24 /* NSString_extensions.m in Sources */,
 				0A33059C10B794F9006E6FDD /* FPEnclosure.m in Sources */,
+				F8A527561119CA9900ABD62E /* ISO8601DateFormatter.m in Sources */,
+				F8A528D8111AFDD500ABD62E /* FPAtomText.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
